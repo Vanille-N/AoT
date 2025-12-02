@@ -17,3 +17,16 @@
   fs
 }
 
+#let divisors(n) = {
+  let divs = (1, n)
+  let d = 2
+  while d * d <= n {
+    if calc.rem(n, d) == 0 {
+      divs.push(d)
+      divs.push(int(n / d))
+    }
+    d += 1
+  }
+  divs.sorted().dedup()
+}
+

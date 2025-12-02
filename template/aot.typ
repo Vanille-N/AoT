@@ -27,6 +27,9 @@
 #let _draft = state("draft", false)
 #let draft() = _draft.update(true)
 
+#let _full-log = state("full-log", false)
+#let full-log() = _full-log.update(true)
+
 #let _solve-id = state("solve-id", 0)
 
 #let calendar(year, month, highlight: ()) = {
@@ -162,9 +165,24 @@
     _hint.update(none)
     _answer.update(none)
     _draft.update(false)
+    _full-log.update(false)
     tt
   }
   show heading.where(level: 2): set text(fill: palette.yellow)
+  {
+    [== Parsing ]
+    show: block.with(width: 100%, stroke: palette.dimmed, inset: 5pt)
+    context {
+      let parser = _parser.at(label("begin-dummy-0"))
+      if type(parser) == function {
+        let data = parser(read(sys.inputs.dummy))
+        [#data]
+      } else {
+        text(fill: palette.text)[(No parser specified yet.)]
+      }
+    }
+  }
+
   doc
 
   pagebreak()
@@ -208,7 +226,11 @@
       context {
         let parser = _parser.get()
         let data = parser(read(sys.inputs.data))
-        place(hide(fun(data)))
+        if _full-log.get() {
+          [#fun(data)]
+        } else {
+          place(hide[#fun(data)])
+        }
       }
     }
   }
