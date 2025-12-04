@@ -24,6 +24,15 @@
 #let _parser = state("parser")
 #let parser(fun) = _parser.update(_ => fun)
 
+#let _testing = state("testing", true)
+#let _display = state("display", d => [#d])
+#let printer(fun) = _display.update(_ => fun)
+#let print(data) = context {
+  if _testing.get() {
+    _display.at(label("begin-dummy-0"))(data)
+  }
+}
+
 #let _draft = state("draft", false)
 #let draft() = _draft.update(true)
 
@@ -157,7 +166,7 @@
       )
     }
   }
-  
+
   pagebreak()
   [= Logs]
 
@@ -176,7 +185,7 @@
       let parser = _parser.at(label("begin-dummy-0"))
       if type(parser) == function {
         let data = parser(read(sys.inputs.dummy))
-        [#data]
+        print(data)
       } else {
         text(fill: palette.text)[(No parser specified yet.)]
       }
@@ -218,6 +227,7 @@
   }
   [=== end #label("end-dummy-" + str(id))]
   [=== begin #label("begin-real-" + str(id))]
+  _testing.update(false)
   context {
     if _draft.get() [
       Final computation skipped.
@@ -234,6 +244,7 @@
       }
     }
   }
+  _testing.update(true)
   [=== end #label("end-real-" + str(id))]
 }
 

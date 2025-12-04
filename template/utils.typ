@@ -30,3 +30,14 @@
   divs.sorted().dedup()
 }
 
+#let argmax(arr) = {
+  let best = none
+  let idx = none
+  for (i, elt) in arr.enumerate() {
+    if best == none or elt > best {
+      best = elt
+      idx = i
+    }
+  }
+  idx
+}
