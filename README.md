@@ -6,7 +6,7 @@ Advent of Code in Typst
 ## Process
 
 Run this every day
-```
+```sh
 $ just today
 $ just dummy
 # (paste the example input)
@@ -16,7 +16,7 @@ $ just init
 $ just edit
 ```
 And in another terminal
-```
+```sh
 $ open build.pdf &
 $ just watch
 ```
