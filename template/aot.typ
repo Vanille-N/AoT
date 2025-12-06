@@ -1,17 +1,8 @@
 #import "utils.typ"
 #import "lib.typ"
 
-#let palette = (
-  background: rgb("0F0F23"),
-  text: rgb("A8B7A5"),
-  dimmed: rgb("2D2D30"),
-  color: rgb("047F0E"),
-  bright: rgb("8BCD6A"),
-
-  red: red.lighten(10%),
-  blue: blue.lighten(60%),
-  yellow: yellow.darken(20%),
-)
+#import "visuals.typ"
+#import visuals: palette
 
 #let log-line(msg) = [#msg \ ]
 
@@ -51,27 +42,23 @@
   grid(columns: (1cm, 1fr, 7cm),
     align(bottom, box[
       #show: rotate.with(-90deg, reflow: true)
-      #set text(size: 20pt, fill: palette.color)
+      #set text(size: 20pt)
       #emph[#{start-date.display("[month repr:long] [year]")}]
     ]),
     box[
       #set text(size: 17pt)
-      #let cell(day) = {
-        box(
-          inset: 5pt,
-          width: 100%,
-          stroke: if day in highlight { palette.bright + 3pt } else { palette.color + 1pt },
-          fill: if day in highlight { palette.dimmed } else { palette.dimmed },
-        )[
-          #{
-            if day in highlight {
-              strong[#day]
-            } else {
-              emph[#day]
-            }
+      #let cell(day) = box(
+        inset: 5pt,
+        width: 100%,
+        stroke: if day in highlight { 3pt } else { 1.1pt },
+        {
+          if day in highlight {
+            strong[#day]
+          } else {
+            emph[#day]
           }
-        ]
-      }
+        }
+      )
       #grid(columns: 7, gutter: 5pt,
         ..( for i in range(start-date.weekday() - 1) { ([],) } ),
         ..({
@@ -83,59 +70,19 @@
         })
       )
     ],
-    [
-      // Art from: https://delightlylinux.wordpress.com/2021/12/23/a-simple-ascii-christmas-tree-in-bash/
-      #let art = ```
-          *
-         /.\
-        /o..\
-        /..o\
-       /.o..o\
-       /...o.\
-      /..o....\
-      ^^^[_]^^^
-      ```
-      #set text(size: 20pt)
-      #set par(leading: 0.4em)
-      #show "*": set text(fill: palette.yellow)
-      #let _decoration-parity = state("decoration-parity", 0)
-      #show "o": {
-        context {
-          let color = if calc.rem(_decoration-parity.get(), 2) == 0 {
-            palette.red
-          } else {
-            palette.blue
-          }
-          text(fill: color)[#h(1pt)`o`#h(1pt)]
-          _decoration-parity.update(x => x + 1)
-        }
-      }
-      #show "[_]": set text(fill: yellow.darken(50%))
-      #show regex("\\\\|\\.|\\/|\\^"): set text(fill: palette.color)
-      #link("https://adventofcode.com/2024/day/2")[#art]
-    ]
+    visuals.christmas-tree,
   )
 }
 
 #let format(doc) = {
-  set text(size: 13pt, fill: palette.text, font: "Source Code Pro")
-  show strong: set text(fill: palette.bright)
-  show emph: tt => text(fill: palette.color, tt.body)
+  show: visuals.apply
 
   set document(
-    title: {
-      set text(size: 25pt)
-      set text(fill: palette.bright)
-      [#h(1fr) Advent of Code #h(1fr)]
-    },
+    title: [Advent of Code],
   )
-  set page(fill: palette.background)
 
   title()
   calendar(year, 12, highlight: (day,))
-
-  show heading.where(level: 3): tt => place(hide(tt))
-  show heading: strong
 
   [= Answers]
 
@@ -148,15 +95,15 @@
         #let expected = _hint.at(label-dummy)
         #let computed = _answer.at(label-dummy)
         Executed on the #emph[example input]. \
-        - Expected answer: #{if expected != none { strong[#expected] } else { [_?_] }}
-        - Computed answer: #{if computed != none { strong[#computed] } else { [_?_] }}
+        - Expected answer: #{if expected != none { strong[#expected] } else { [```unk ?```] }}
+        - Computed answer: #{if computed != none { strong[#computed] } else { [```unk ?```] }}
         #{
           if expected == none or computed == none {
-            [Data is #text(fill: palette.yellow)[incomplete]]
+            [Data is ```unk incomplete```]
           } else if expected == computed {
-            [This seems #text(fill: palette.blue)[correct]]
+            [This seems ```ok correct```]
           } else {
-            [This seems #text(fill: palette.red)[incorrect]]
+            [This seems ```err incorrect```]
           }
         }
 
@@ -190,7 +137,7 @@
         let data = parser(read(sys.inputs.dummy))
         print(data)
       } else {
-        text(fill: palette.text)[(No parser specified yet.)]
+        [(No parser specified yet.)]
       }
     }
   }
@@ -211,16 +158,25 @@
       show: block.with(width: 100%, stroke: palette.dimmed, inset: 10pt)
       [
         #let full = read(sys.inputs.source).split("\n=\n").at(id + 1).trim("\n")
-        #let filtered = full.split("\n").map(ln => {
-          if ln.contains("aot.log-line") or ln.contains("aot.hint") {
-            ""
-          } else if ln.contains("// ") {
-            ln.split("// ").at(0)
-          } else {
-            ln
+        #let filtered = ()
+        #{
+          let take = true
+          for ln in full.split("\n") {
+            if ln.contains("//!>") {
+              take = false
+            } else if ln.contains("//<!") {
+              take = true
+            } else if ln.contains("aot.log-line") {
+            } else if ln.contains("aot.hint") {
+            } else if ln.contains("//!!") {
+            } else if ln.contains("//!") {
+              filtered.push(ln.split("//!").at(0))
+            } else {
+              filtered.push(ln)
+            } 
           }
-        }).filter(ln => ln != "")
-        #raw(block: true, lang: "typ", filtered.join("\n"))
+        }
+        #raw(block: true, lang: "typ", filtered.join("\n").trim("\n").replace(regex("\n\n+"), "\n\n"))
       ]
     }
   }
