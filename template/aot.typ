@@ -1,4 +1,5 @@
 #import "utils.typ"
+#import "lib.typ"
 
 #let palette = (
   background: rgb("0F0F23"),
