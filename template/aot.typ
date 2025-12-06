@@ -13,6 +13,8 @@
   yellow: yellow.darken(20%),
 )
 
+#let log-line(msg) = [#msg \ ]
+
 #let year = int(sys.inputs.year)
 #let day = int(sys.inputs.day)
 
@@ -209,7 +211,16 @@
       show: block.with(width: 100%, stroke: palette.dimmed, inset: 10pt)
       [
         #let full = read(sys.inputs.source).split("\n=\n").at(id + 1).trim("\n")
-        #raw(block: true, lang: "typ", full)
+        #let filtered = full.split("\n").map(ln => {
+          if ln.contains("aot.log-line") or ln.contains("aot.hint") {
+            ""
+          } else if ln.contains("// ") {
+            ln.split("// ").at(0)
+          } else {
+            ln
+          }
+        }).filter(ln => ln != "")
+        #raw(block: true, lang: "typ", filtered.join("\n"))
       ]
     }
   }
