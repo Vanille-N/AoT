@@ -41,3 +41,12 @@
   }
   idx
 }
+
+#let crossprod(l1, l2) = {
+  for e1 in l1 {
+    for e2 in l2 {
+      ((e1, e2),)
+    }
+  }
+}
+

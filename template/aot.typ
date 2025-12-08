@@ -4,7 +4,12 @@
 #import "visuals.typ"
 #import visuals: palette
 
-#let log-line(msg) = [#msg \ ]
+#let _printing = state("printing", true)
+#let log-line(msg) = context {
+  if _printing.get() {
+    [#msg \ ]
+  }
+}
 
 #let year = int(sys.inputs.year)
 #let day = int(sys.inputs.day)
@@ -18,11 +23,10 @@
 #let _parser = state("parser")
 #let parser(fun) = _parser.update(_ => fun)
 
-#let _testing = state("testing", true)
 #let _display = state("display", d => [#d])
 #let printer(fun) = _display.update(_ => fun)
 #let print(data) = context {
-  if _testing.get() {
+  if _printing.get() {
     _display.at(label("begin-dummy-0"))(data)
   }
 }
@@ -111,9 +115,8 @@
 
         #let computed = _answer.at(label("end-real-" + str(id)))
         Executed on the #emph[evaluation input]. \
-        - Computed answer: #{if computed != none { strong[#computed] } else { [_?_] }}
-      ]
-      )
+        - Computed answer: #{if computed != none { strong[#computed] } else { [```unk ?```] }}
+      ])
     }
   }
 
@@ -195,7 +198,6 @@
   }
   [=== end #label("end-dummy-" + str(id))]
   [=== begin #label("begin-real-" + str(id))]
-  _testing.update(false)
   context {
     if _draft.get() [
       Final computation skipped.
@@ -207,12 +209,15 @@
         if _full-log.get() {
           [#fun(data)]
         } else {
-          place(hide[#fun(data)])
+          place(hide({
+            _printing.update(false)
+            [#fun(data)]
+            _printing.update(true)
+          }))
         }
       }
     }
   }
-  _testing.update(true)
   [=== end #label("end-real-" + str(id))]
 }
 
