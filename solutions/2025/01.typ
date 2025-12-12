@@ -32,30 +32,30 @@
   let cur = 50
   let zeroed = 0
   for mv in input {
-    [Move: #mv \ ]
+    aot.log-line[> Move: #mv]
     while mv > 100 {
-      [- Full rotation \ ]
+      aot.log-line[Full rotation]
       zeroed += 1
       mv -= 100
     }
     while mv < -100 {
-      [- Full rotation \ ]
+      aot.log-line[Full rotation]
       zeroed += 1
       mv += 100
     }
     let next = cur + mv
     if next <= 0 and cur > 0 {
-      [- Went below and past 0 to #next \ ]
+      aot.log-line[Went below and past 0 to #next]
       zeroed += 1
     } else if next == -100 and cur == 0 {
-      [- Full negative turn to #next]
+      aot.log-line[Full negative turn to #next]
       zeroed += 1
     } else if next >= 100 {
-      [- Full positive turn to #next]
+      aot.log-line[Full positive turn to #next]
       zeroed += 1
     }
     cur = calc.rem-euclid(next, 100)
-    [Pointing at #cur \ ]
+    aot.log-line[Pointing at #cur]
   }
   aot.answer(zeroed)
 })
