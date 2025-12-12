@@ -3,7 +3,9 @@
 #show: aot.format
 
 #aot.parser(input => {
-  input.trim("\n").split("\n").map(s => s.split("").filter(s => s != "").map(int))
+  input.trim("\n").split("\n").map(s => {
+    s.split("").filter(s => s != "").map(int)
+  })
 })
 
 =
@@ -27,17 +29,17 @@
 #aot.solve(input => {
   let total = 0
   for bank in input {
-    [Battery bank: #{bank.map(str).join("")} \ ]
+    aot.log-line[Battery bank: #{bank.map(str).join("")}]
     let jolts = 0
     for i in range(12) {
       let end-idx = if i < 11 { i - 11 } else { none }
       let idx = aot.utils.argmax(bank.slice(0, end-idx))
       let val = bank.at(idx)
       jolts = jolts * 10 + val
-      [- biggest value remaining in #{bank.slice(0, i - 12).map(str).join("")} is #val at #idx ]
+      aot.log-line[biggest value remaining in #{bank.slice(0, i - 12).map(str).join("")} is #val at #idx]
       bank = bank.slice(idx + 1)
     }
-    [- Produces #jolts]
+    aot.log-line[Produces #jolts]
     total += jolts
   }
   aot.answer(total)

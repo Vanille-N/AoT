@@ -188,6 +188,7 @@
               take = true
             } else if ln.contains("aot.log-line") {
             } else if ln.contains("aot.hint") {
+            } else if ln.contains("aot.print") {
             } else if ln.contains("//!!") {
             } else if ln.contains("//!") {
               filtered.push(ln.split("//!").at(0))
