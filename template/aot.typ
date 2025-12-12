@@ -7,7 +7,11 @@
 #let _printing = state("printing", true)
 #let log-line(msg) = context {
   if _printing.get() {
-    [#msg \ ]
+    if type(msg) == function {
+      [#msg() \ ]
+    } else {
+      [#msg \ ]
+    }
   }
 }
 
@@ -137,8 +141,21 @@
     context {
       let parser = _parser.at(label("begin-dummy-0"))
       if type(parser) == function {
-        let data = parser(read(sys.inputs.dummy))
-        print(data)
+        let seen = ()
+        for (idx, (key, file)) in sys.inputs.pairs().filter(((key,_),) => key.contains("dummy")).enumerate() {
+          [== Part #{idx + 1}]
+          if key.contains("dummy") {
+            let text = read(file)
+            if text in seen {
+              [(Same)]
+              continue
+            } else {
+              seen.push(text)
+            }
+            let data = parser(text)
+            print(data)
+          }
+        }
       } else {
         [(No parser specified yet.)]
       }
@@ -193,11 +210,12 @@
   [=== begin #label("begin-dummy-" + str(id))]
   context {
     let parser = _parser.get()
-    let data = parser(read(sys.inputs.dummy))
+    let data = parser(read(sys.inputs.at("dummy-" + str(id + 1), default: "dummy")))
     fun(data)
   }
   [=== end #label("end-dummy-" + str(id))]
   [=== begin #label("begin-real-" + str(id))]
+  _answer.update(none)
   context {
     if _draft.get() [
       Final computation skipped.
